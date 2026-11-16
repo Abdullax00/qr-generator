@@ -1832,6 +1832,24 @@ input[type="range"] {
   border-color: #94a3b8;
 }
 
+.btn-reset {
+  transition: all 0.2s ease;
+}
+
+.btn-reset:hover {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border-color: #fca5a5 !important;
+}
+
+.btn-reset svg {
+  transition: transform 0.3s ease;
+}
+
+.btn-reset:hover svg {
+  transform: rotate(-180deg);
+}
+
 /* Utilities */
 .hidden {
   display: none !important;

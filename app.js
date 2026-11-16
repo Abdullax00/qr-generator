@@ -313,6 +313,8 @@ const downloadPngBtn = document.getElementById("downloadPngBtn");
 const downloadSvgBtn = document.getElementById("downloadSvgBtn");
 const copyClipboardBtn = document.getElementById("copyClipboardBtn");
 const printBtn = document.getElementById("printBtn");
+const resetBtn = document.getElementById("resetBtn");
+const resetBtnSecondary = document.getElementById("resetBtnSecondary");
 
 const standardPreviewCard = document.getElementById("standardPreviewCard");
 const toastEl = document.getElementById("toast");
@@ -1673,6 +1675,10 @@ function setupEvents() {
   downloadSvgBtn.addEventListener("click", downloadSVG);
   copyClipboardBtn.addEventListener("click", copyToClipboard);
   printBtn.addEventListener("click", () => window.print());
+
+  // Reset to Defaults (Header Toolbar & Secondary Button)
+  if (resetBtn) resetBtn.addEventListener("click", resetToDefaults);
+  if (resetBtnSecondary) resetBtnSecondary.addEventListener("click", resetToDefaults);
 }
 
 // Check if current individual shapes match any style button
@@ -1813,6 +1819,105 @@ function clearLogo() {
   updateSvgColorUI();
   refreshQRCode();
   showToast("Логотип удалён");
+}
+
+// Reset all QR code parameters to default values
+function resetToDefaults() {
+  // 1. Reset state to defaults
+  state.url = "https://ilma-it.github.io/ibragimov-ahmad/";
+  state.currentStyle = "classic";
+  state.currentPalette = "monochrome";
+  state.dotType = "square";
+  state.cornerSquareType = "square";
+  state.cornerDotType = "square";
+  state.errorCorrectionLevel = "H";
+  state.qrMargin = 10;
+  state.resolution = 1024;
+
+  // Colors
+  state.colorMode = "solid";
+  state.dotsColor1 = "#0f172a";
+  state.dotsColor2 = "#3b82f6";
+  state.gradientAngle = 135;
+  state.isBgTransparent = false;
+  state.bgColor = "#ffffff";
+  state.bgOpacity = 100;
+  state.customCornerColor = false;
+  state.cornerSquareColor = "#3b82f6";
+  state.cornerDotColor = "#2563eb";
+  state.activeColorTarget = "dots1";
+  state.cachedH = 222;
+  state.cachedS = 85;
+
+  // Logo settings
+  state.isSvgLogo = true;
+  state.svgRawString = SAMPLE_LOGOS_RAW.globe;
+  state.rawLogo = SAMPLE_LOGOS.globe;
+  state.logoName = "globe-icon.svg";
+  state.svgColorMode = "original";
+  state.svgCustomColor = "#2563eb";
+  state.logoSize = 0.45;
+  state.logoMargin = 0;
+  state.logoBadge = "circle";
+  state.hideDotsBehindLogo = true;
+
+  // 2. Synchronize UI Inputs
+  if (urlInput) urlInput.value = "ilma-it.github.io/ibragimov-ahmad/";
+  updateUrlDisplay();
+
+  const resSelect = document.getElementById("resolutionSelect");
+  if (resSelect) resSelect.value = "1024";
+
+  // QR Geometric Style buttons
+  document.querySelectorAll(".style-btn").forEach((b) => {
+    b.classList.toggle("active", b.getAttribute("data-style") === "classic");
+  });
+
+  // Shapes & Density buttons
+  syncActiveButton("#dotTypeBtns", "square");
+  syncActiveButton("#cornerSquareBtns", "square");
+  syncActiveButton("#cornerDotBtns", "square");
+  syncActiveButton("#densityBtns", "H");
+  const densityHint = document.getElementById("densityHint");
+  if (densityHint) {
+    densityHint.textContent = "Level H (Мелкая плотная сетка, для логотипа 30%)";
+  }
+
+  // Logo UI Controls
+  if (logoSizeInput) logoSizeInput.value = 45;
+  if (logoSizeVal) logoSizeVal.textContent = "45%";
+  if (logoMarginInput) logoMarginInput.value = 0;
+  if (logoMarginVal) logoMarginVal.textContent = "0px";
+  if (hideDotsBehindLogo) hideDotsBehindLogo.checked = true;
+
+  syncActiveButton("#logoBadgeBtns", "circle");
+
+  // Sample Logo buttons
+  document.querySelectorAll(".sample-logo-btn").forEach((b) => {
+    b.classList.toggle("active", b.getAttribute("data-icon") === "globe");
+  });
+  if (logoFileName) logoFileName.textContent = "globe-icon.svg";
+  if (dropzoneEmpty) dropzoneEmpty.classList.add("hidden");
+  if (dropzonePreview) dropzonePreview.classList.remove("hidden");
+  if (logoFileInput) logoFileInput.value = "";
+
+  // SVG Color Studio UI
+  updateSvgColorUI();
+
+  // Color Studio & Palettes UI
+  document.querySelectorAll(".unique-palette-btn").forEach((b) => {
+    b.classList.toggle("active", b.getAttribute("data-palette") === "monochrome");
+  });
+
+  syncInputsWithState();
+  updateStudioMixerFromActiveTarget();
+  updateTransparencyVisuals();
+
+  // 3. Process logo and refresh QR code preview
+  processAndApplyLogo();
+  updateReadabilityAnalysis();
+
+  showToast("Параметры сброшены к значениям по умолчанию");
 }
 
 // Sync Form Inputs with Internal State
