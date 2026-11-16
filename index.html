@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Studio Pro — Генератор стильных QR-кодов с логотипом</title>
+  <meta name="description" content="Создавайте красивые QR-коды с логотипом (PNG/SVG), градиентами и формами. Оптимизировано для мгновенного перехода по ссылке на iOS и Android.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1.5'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1.5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            <circle cx="6.5" cy="6.5" r="1" fill="currentColor"></circle>
+            <circle cx="17.5" cy="6.5" r="1" fill="currentColor"></circle>
+            <circle cx="6.5" cy="17.5" r="1" fill="currentColor"></circle>
+            <circle cx="17.5" cy="17.5" r="1" fill="currentColor"></circle>
+          </svg>
+        </div>
+        <div>
+          <h1>QR Studio Pro</h1>
+          <p class="subtitle">Генератор дизайнерских QR-кодов с логотипом для iOS & Android</p>
+        </div>
+      </div>
+      <!-- Action & Download Toolbar in Header -->
+      <div class="header-actions-toolbar">
+        <div class="header-res-selector" title="Разрешение при экспорте">
+          <select id="resolutionSelect">
+            <option value="512">512 × 512 (Компактный)</option>
+            <option value="1024" selected>1024 × 1024 HD</option>
+            <option value="2048">2048 × 2048 4K (Печать)</option>
+            <option value="4096">4096 × 4096 Ultra (Баннеры)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" id="downloadPngBtn" title="Скачать растровый PNG в высоком качестве">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Скачать PNG</span>
+        </button>
+
+        <button class="btn btn-secondary" id="downloadSvgBtn" title="Скачать векторный SVG без потери качества">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          <span>Вектор SVG</span>
+        </button>
+
+        <button class="btn btn-icon-only btn-ghost" id="copyClipboardBtn" title="Скопировать картинку в буфер обмена">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </button>
+
+        <button class="btn btn-icon-only btn-ghost" id="printBtn" title="Распечатать QR-код">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main-container">
+      <!-- Left Column: Controls & Customization -->
+      <section class="controls-panel">
+        
+        <!-- QR Geometry Styles Bar with Visual Icons -->
+        <div class="card style-card">
+          <div class="style-selector-header">
+            <label class="section-label" style="margin-bottom:0;">⚡ Стили формы QR-кода</label>
+            <span class="style-subtitle">Выберите форму рисунка (цвета настраиваются отдельно)</span>
+          </div>
+          <div class="style-grid" id="styleGrid">
+            <button class="style-btn active" data-style="classic" title="Классический стиль: строгие четкие квадраты">
+              <div class="style-icon">
+                <svg width="26" height="26" viewBox="0 0 32 32" fill="currentColor">
+                  <rect x="2" y="2" width="12" height="12" rx="0" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <rect x="5.5" y="5.5" width="5" height="5" rx="0"/>
+                  <rect x="18" y="2" width="4" height="4"/>
+                  <rect x="26" y="2" width="4" height="4"/>
+                  <rect x="18" y="10" width="4" height="4"/>
+                  <rect x="26" y="10" width="4" height="4"/>
+                  <rect x="18" y="18" width="4" height="4"/>
+                  <rect x="26" y="18" width="4" height="4"/>
+                  <rect x="22" y="26" width="4" height="4"/>
+                  <rect x="26" y="26" width="4" height="4"/>
+                  <rect x="2" y="18" width="12" height="12" rx="0" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <rect x="5.5" y="21.5" width="5" height="5" rx="0"/>
+                </svg>
+              </div>
+              <span class="style-name">Классика</span>
+            </button>
+
+            <button class="style-btn" data-style="rounded" title="Скругленный стиль: мягкие закругленные углы и точки">
+              <div class="style-icon">
+                <svg width="26" height="26" viewBox="0 0 32 32" fill="currentColor">
+                  <rect x="2" y="2" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <circle cx="8" cy="8" r="2.5"/>
+                  <rect x="18" y="2" width="4" height="4" rx="1.5"/>
+                  <rect x="26" y="2" width="4" height="4" rx="1.5"/>
+                  <rect x="18" y="10" width="4" height="4" rx="1.5"/>
+                  <rect x="26" y="10" width="4" height="4" rx="1.5"/>
+                  <rect x="18" y="18" width="4" height="4" rx="1.5"/>
+                  <rect x="26" y="18" width="4" height="4" rx="1.5"/>
+                  <rect x="22" y="26" width="4" height="4" rx="1.5"/>
+                  <rect x="26" y="26" width="4" height="4" rx="1.5"/>
+                  <rect x="2" y="18" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <circle cx="8" cy="24" r="2.5"/>
+                </svg>
+              </div>
+              <span class="style-name">Скругленный</span>
+            </button>
+
+            <button class="style-btn" data-style="dots" title="Точечный стиль: полностью круглые модули и концентрические маркеры">
+              <div class="style-icon">
+                <svg width="26" height="26" viewBox="0 0 32 32" fill="currentColor">
+                  <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <circle cx="8" cy="8" r="2.8"/>
+                  <circle cx="20" cy="4" r="2"/>
+                  <circle cx="28" cy="4" r="2"/>
+                  <circle cx="20" cy="12" r="2"/>
+                  <circle cx="28" cy="12" r="2"/>
+                  <circle cx="20" cy="20" r="2"/>
+                  <circle cx="28" cy="20" r="2"/>
+                  <circle cx="20" cy="28" r="2"/>
+                  <circle cx="28" cy="28" r="2"/>
+                  <circle cx="8" cy="24" r="6" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <circle cx="8" cy="24" r="2.8"/>
+                </svg>
+              </div>
+              <span class="style-name">Точечный</span>
+            </button>
+
+            <button class="style-btn" data-style="classy" title="Элегантный стиль: ромбовидно-скругленные модули">
+              <div class="style-icon">
+                <svg width="26" height="26" viewBox="0 0 32 32" fill="currentColor">
+                  <rect x="2" y="2" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <circle cx="8" cy="8" r="2.5"/>
+                  <path d="M18 2 C21 2 22 3 22 6 C22 6 22 6 18 6 Z"/>
+                  <path d="M26 2 C29 2 30 3 30 6 C30 6 30 6 26 6 Z"/>
+                  <path d="M18 10 C21 10 22 11 22 14 C22 14 22 14 18 14 Z"/>
+                  <path d="M26 10 C29 10 30 11 30 14 C30 14 30 14 26 14 Z"/>
+                  <path d="M18 18 C21 18 22 19 22 22 C22 22 22 22 18 22 Z"/>
+                  <path d="M26 18 C29 18 30 19 30 22 C30 22 30 22 26 22 Z"/>
+                  <path d="M22 26 C25 26 26 27 26 30 C26 30 26 30 22 30 Z"/>
+                  <rect x="2" y="18" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <circle cx="8" cy="24" r="2.5"/>
+                </svg>
+              </div>
+              <span class="style-name">Элегантный</span>
+            </button>
+
+            <button class="style-btn" data-style="classyRounded" title="Плавный стиль: соединенные каплевидные элементы">
+              <div class="style-icon">
+                <svg width="26" height="26" viewBox="0 0 32 32" fill="currentColor">
+                  <rect x="2" y="2" width="12" height="12" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <rect x="5.5" y="5.5" width="5" height="5" rx="1.5"/>
+                  <rect x="18" y="2" width="10" height="4" rx="2"/>
+                  <rect x="18" y="10" width="4" height="4" rx="2"/>
+                  <rect x="26" y="10" width="4" height="4" rx="2"/>
+                  <rect x="18" y="18" width="4" height="10" rx="2"/>
+                  <rect x="26" y="18" width="4" height="4" rx="2"/>
+                  <rect x="26" y="26" width="4" height="4" rx="2"/>
+                  <rect x="2" y="18" width="12" height="12" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <rect x="5.5" y="21.5" width="5" height="5" rx="1.5"/>
+                </svg>
+              </div>
+              <span class="style-name">Плавный</span>
+            </button>
+
+            <button class="style-btn" data-style="extraRounded" title="Extra round: органические пилюли и супер-скругление">
+              <div class="style-icon">
+                <svg width="26" height="26" viewBox="0 0 32 32" fill="currentColor">
+                  <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <circle cx="8" cy="8" r="2.8"/>
+                  <rect x="18" y="2" width="10" height="4" rx="2"/>
+                  <rect x="18" y="9" width="4" height="7" rx="2"/>
+                  <rect x="25" y="9" width="5" height="4" rx="2"/>
+                  <rect x="18" y="18" width="8" height="4" rx="2"/>
+                  <rect x="27" y="18" width="4" height="8" rx="2"/>
+                  <rect x="18" y="25" width="6" height="5" rx="2.5"/>
+                  <circle cx="8" cy="24" r="6" fill="none" stroke="currentColor" stroke-width="2.4"/>
+                  <circle cx="8" cy="24" r="2.8"/>
+                </svg>
+              </div>
+              <span class="style-name">Extra round</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section: Shape & Dots Design (Перенесен под стили формы) -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon amber">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path></svg>
+            </div>
+            <div>
+              <h3>Форма точек и углов</h3>
+              <p class="card-desc">Детальная настройка формы рисунка и угловых рамок</p>
+            </div>
+          </div>
+
+          <div class="shapes-grid">
+            <!-- QR Grid Density & Cell Size (Плотность сетки и размер ячеек кода) -->
+            <div class="shape-group" style="grid-column: 1 / -1;">
+              <div class="density-header-row">
+                <label class="group-title" style="margin-bottom: 0;">Плотность сетки и размер ячеек:</label>
+                <span class="density-hint" id="densityHint">Level H (Мелкая плотная сетка, для логотипа 30%)</span>
+              </div>
+              <div class="shape-buttons density-buttons" id="densityBtns">
+                <button class="shape-btn" data-ec="L" title="Крупная сетка: минимальная плотность, крупные выразительные ячейки (Level L 7%)">
+                  <strong>Крупная</strong>
+                  <span class="btn-subtext">Большие ячейки</span>
+                </button>
+                <button class="shape-btn" data-ec="M" title="Стандартная плотность: средний размер ячеек, универсальный баланс (Level M 15%)">
+                  <strong>Стандарт</strong>
+                  <span class="btn-subtext">Средние ячейки</span>
+                </button>
+                <button class="shape-btn" data-ec="Q" title="Повышенная плотность: более мелкая сетка, повышенная защита (Level Q 25%)">
+                  <strong>Плотная</strong>
+                  <span class="btn-subtext">Защита 25%</span>
+                </button>
+                <button class="shape-btn active" data-ec="H" title="Максимальная плотность: мелкие точки, максимальная стойкость к повреждениям и перекрытию логотипом (Level H 30%)">
+                  <strong>Мелкая</strong>
+                  <span class="btn-subtext">Для логотипа 30%</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Dots Shape -->
+            <div class="shape-group">
+              <label class="group-title">Форма точек рисунка:</label>
+              <div class="shape-buttons" id="dotTypeBtns">
+                <button class="shape-btn" data-type="rounded">Скругленные</button>
+                <button class="shape-btn" data-type="dots">Круглые точки</button>
+                <button class="shape-btn" data-type="classy">Элегантные</button>
+                <button class="shape-btn" data-type="classy-rounded">Плавные</button>
+                <button class="shape-btn active" data-type="square">Классика</button>
+                <button class="shape-btn" data-type="extra-rounded">Extra round</button>
+              </div>
+            </div>
+
+            <!-- Corner Square Shape -->
+            <div class="shape-group">
+              <label class="group-title">Внешняя рамка углов:</label>
+              <div class="shape-buttons" id="cornerSquareBtns">
+                <button class="shape-btn" data-type="extra-rounded">Закругленная</button>
+                <button class="shape-btn" data-type="dot">Круглая</button>
+                <button class="shape-btn active" data-type="square">Квадратная</button>
+              </div>
+            </div>
+
+            <!-- Corner Dot Shape -->
+            <div class="shape-group">
+              <label class="group-title">Центральная точка углов:</label>
+              <div class="shape-buttons" id="cornerDotBtns">
+                <button class="shape-btn" data-type="dot">Круглая точка</button>
+                <button class="shape-btn active" data-type="square">Квадрат</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 1: URL & Link -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            </div>
+            <div>
+              <h3>Ссылка на сайт</h3>
+              <p class="card-desc">Камера iOS и Android сразу покажет кнопку перехода в браузер</p>
+            </div>
+          </div>
+
+          <div class="url-input-wrapper">
+            <div class="url-field">
+              <span class="url-prefix" id="urlProtocolBadge">https://</span>
+              <input type="text" id="urlInput" placeholder="mysite.ru или ссылка" value="ilma-it.github.io/ibragimov-ahmad/" autocomplete="off" aria-label="Адрес сайта для QR-кода">
+            </div>
+            <button class="btn btn-secondary btn-icon" id="testLinkBtn" title="Проверить открытие ссылки в новой вкладке" aria-label="Проверить ссылку">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <span>Тест</span>
+            </button>
+          </div>
+
+          <!-- Quick Fill Projects -->
+          <div class="quick-projects">
+            <span class="quick-label">Быстрая вставка проектов:</span>
+            <div class="project-chips">
+              <button class="chip" data-url="https://ilma-it.github.io/ibragimov-ahmad/">Ахьмад (Теплица)</button>
+              <button class="chip" data-url="https://ilma-it.github.io/ibragimov-mokhmad/">Мохьмад (3D)</button>
+              <button class="chip" data-url="https://ilma-it.github.io/maskhadov-adam/">Адам (Теплица)</button>
+              <button class="chip" data-url="https://ilma-it.github.io/mutsaev-bilal/">Билал (BioSphere)</button>
+              <button class="chip" data-url="https://ilma-it.github.io/mutsaev-said/">Саид (Теплица)</button>
+              <button class="chip" data-url="https://ilma-it.github.io/mutsaev-samad/">Самад (Теплица)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Logo Center -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </div>
+            <div>
+              <h3>Логотип по центру (PNG или SVG)</h3>
+              <p class="card-desc">Загрузите файл компании или выберите готовую иконку</p>
+            </div>
+          </div>
+
+          <!-- Upload Dropzone -->
+          <div class="upload-dropzone" id="dropZone">
+            <input type="file" id="logoFileInput" accept="image/png, image/svg+xml, image/jpeg, image/webp" class="file-input-hidden">
+            <div class="dropzone-content" id="dropzoneEmpty">
+              <div class="upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              </div>
+              <div class="upload-text">
+                <strong>Нажмите для выбора</strong> или перетащите логотип сюда
+                <span class="upload-hint">Поддерживаются PNG, SVG, JPG, WebP</span>
+              </div>
+            </div>
+
+            <div class="dropzone-preview hidden" id="dropzonePreview">
+              <img id="logoPreviewThumb" src="" alt="Логотип">
+              <div class="logo-info">
+                <span id="logoFileName" class="logo-filename">logo.png</span>
+                <span class="logo-meta">Отображается в центре QR</span>
+              </div>
+              <button class="btn-remove-logo" id="removeLogoBtn" title="Удалить логотип">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Sample Logos -->
+          <div class="sample-logos-section">
+            <span class="quick-label">Или выберите быструю иконку:</span>
+            <div class="sample-logos-grid" id="sampleLogos">
+              <button class="sample-logo-btn" data-icon="globe" title="Сайт / Интернет">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              </button>
+              <button class="sample-logo-btn" data-icon="telegram" title="Telegram">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#0284c7"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+              </button>
+              <button class="sample-logo-btn" data-icon="whatsapp" title="WhatsApp">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#16a34a"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.11 6.88C8.94 6.88 8.66 6.94 8.43 7.19C8.2 7.44 7.56 8.04 7.56 9.27C7.56 10.5 8.45 11.69 8.58 11.86C8.7 12.03 10.34 14.56 12.85 15.65C14.94 16.55 15.36 16.37 15.82 16.33C16.28 16.29 17.3 15.72 17.51 15.13C17.72 14.54 17.72 14.04 17.66 13.93C17.6 13.82 17.44 13.76 17.2 13.64C16.96 13.52 15.78 12.94 15.56 12.86C15.34 12.78 15.18 12.74 15.02 12.98C14.86 13.22 14.4 13.82 14.26 13.98C14.12 14.14 13.98 14.16 13.74 14.04C13.5 13.92 12.48 13.59 11.27 12.51C10.33 11.67 9.7 10.63 9.56 10.39C9.42 10.15 9.55 10.02 9.67 9.9C9.77 9.8 9.9 9.63 10.02 9.49C10.14 9.35 10.18 9.25 10.26 9.09C10.34 8.93 10.3 8.79 10.24 8.67C10.18 8.55 9.72 7.42 9.53 6.96C9.34 6.51 9.15 6.57 9.11 6.88Z"/></svg>
+              </button>
+              <button class="sample-logo-btn" data-icon="youtube" title="YouTube">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#dc2626"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              </button>
+              <button class="sample-logo-btn" data-icon="github" title="GitHub">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#181717"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              </button>
+              <button class="sample-logo-btn" data-icon="star" title="Звезда / Премиум">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#eab308"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Logo Settings Controls -->
+          <div class="logo-controls-grid">
+            <div class="slider-control" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="slider-header">
+                  <span>Размер логотипа:</span>
+                  <span id="logoSizeVal" class="slider-val">45%</span>
+                </div>
+                <input type="range" id="logoSizeInput" min="10" max="100" value="45" step="1">
+              </div>
+              <div class="logo-size-chips">
+                <button class="logo-chip" data-size="20">20%</button>
+                <button class="logo-chip" data-size="35">35%</button>
+                <button class="logo-chip active" data-size="45">45%</button>
+                <button class="logo-chip" data-size="65">65%</button>
+                <button class="logo-chip" data-size="85">85%</button>
+                <button class="logo-chip" data-size="100">100%</button>
+              </div>
+            </div>
+
+            <div class="slider-control">
+              <div class="slider-header">
+                <span>Отступ вокруг:</span>
+                <span id="logoMarginVal" class="slider-val">0 px</span>
+              </div>
+              <input type="range" id="logoMarginInput" min="0" max="15" value="0" step="1">
+            </div>
+          </div>
+
+          <!-- Logo Badge Shape -->
+          <div class="logo-badge-section" style="margin-bottom: 12px;">
+            <label class="group-title">Подложка под логотип:</label>
+            <div class="shape-buttons" id="logoBadgeBtns">
+              <button class="shape-btn active" data-badge="circle">Круглая белая</button>
+              <button class="shape-btn" data-badge="rounded">Закругленный квадрат</button>
+              <button class="shape-btn" data-badge="none">Без подложки</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="form-checkbox">
+              <input type="checkbox" id="hideDotsBehindLogo" checked>
+              <span>Скрывать точки под логотипом (рекомендуется)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 3: Colors, Mixer & Transparency -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>
+            </div>
+            <div>
+              <h3>Цвета, Палитра и Прозрачность</h3>
+              <p class="card-desc">Интерактивный микшер любого цвета, радужный спектр и RGB</p>
+            </div>
+          </div>
+
+          <!-- Color Mode Switch -->
+          <div class="color-mode-section">
+            <label class="group-title">Тип окраски рисунка:</label>
+            <div class="segmented-control" id="colorModeSwitch">
+              <button class="seg-btn active" data-mode="solid">Сплошной цвет</button>
+              <button class="seg-btn" data-mode="linear">Линейный градиент</button>
+              <button class="seg-btn" data-mode="radial">Радиальный градиент</button>
+            </div>
+          </div>
+
+          <!-- Gradient Controls (Angle slider + quick angle presets) -->
+          <div class="gradient-angle-box hidden" id="gradientAngleBox">
+            <div class="slider-header">
+              <span>Угол наклона градиента:</span>
+              <span id="gradientAngleVal" class="slider-val">135°</span>
+            </div>
+            <input type="range" id="gradientAngleInput" min="0" max="360" value="135" step="5">
+            <div class="angle-chips">
+              <button class="angle-chip" data-angle="0">0° ➔</button>
+              <button class="angle-chip" data-angle="45">45° ↗</button>
+              <button class="angle-chip" data-angle="90">90° ⬆</button>
+              <button class="angle-chip active" data-angle="135">135° ↘</button>
+              <button class="angle-chip" data-angle="180">180° ⬅</button>
+            </div>
+          </div>
+
+          <!-- Interactive Color Mixer & Visual Studio -->
+          <div class="color-studio-container">
+            <div class="studio-header">
+              <label class="group-title">🎯 Выберите элемент для настройки цвета:</label>
+              <div class="studio-target-tabs" id="studioTargetTabs">
+                <button class="target-tab active" data-target="dots1">
+                  <span class="tab-indicator" id="indDots1" style="background:#0f172a;"></span>
+                  <span>Основной</span>
+                </button>
+                <button class="target-tab hidden" id="tabDots2" data-target="dots2">
+                  <span class="tab-indicator" id="indDots2" style="background:#3b82f6;"></span>
+                  <span>Градиент 2</span>
+                </button>
+                <button class="target-tab" data-target="bg">
+                  <span class="tab-indicator" id="indBg" style="background:#ffffff; border:1px solid #94a3b8;"></span>
+                  <span>Фон</span>
+                </button>
+                <button class="target-tab hidden" id="tabCornersSquare" data-target="cornersSquare">
+                  <span class="tab-indicator" id="indCornersSquare" style="background:#3b82f6;"></span>
+                  <span>Рамки</span>
+                </button>
+                <button class="target-tab hidden" id="tabCornersDot" data-target="cornersDot">
+                  <span class="tab-indicator" id="indCornersDot" style="background:#2563eb;"></span>
+                  <span>Точки углов</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Color Bar (Preview + Text Inputs + Native Picker Button) -->
+            <div class="active-color-bar">
+              <div class="color-preview-large" id="studioActivePreview" style="background: #0f172a;"></div>
+              
+              <div class="color-inputs-group">
+                <div class="input-with-label">
+                  <span class="input-prefix">HEX</span>
+                  <input type="text" id="studioHexInput" class="studio-text-input" value="#0f172a" placeholder="#000000 или blue" spellcheck="false">
+                </div>
+                <div class="input-with-label">
+                  <span class="input-prefix">RGB</span>
+                  <input type="text" id="studioRgbInput" class="studio-text-input" value="15, 23, 42" spellcheck="false" placeholder="R, G, B">
+                </div>
+              </div>
+
+              <!-- Native OS Color Picker Button -->
+              <label class="btn-native-picker" title="Выбрать в системном окне цветов">
+                <input type="color" id="studioNativePicker" value="#0f172a" class="native-picker-hidden">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>
+                <span>Пипетка</span>
+              </label>
+            </div>
+
+            <!-- Rainbow Spectrum Slider (Hue: 0° - 360°) -->
+            <div class="spectrum-slider-card">
+              <div class="slider-header">
+                <span class="slider-title">🌈 Радужный спектр оттенка (Hue):</span>
+                <span id="hueValLabel" class="slider-val">222°</span>
+              </div>
+              <input type="range" id="hueSlider" class="rainbow-slider" min="0" max="360" value="222" step="1">
+            </div>
+
+            <!-- Brightness / Lightness Slider -->
+            <div class="spectrum-slider-card">
+              <div class="slider-header">
+                <span class="slider-title">☀️ Яркость цвета (Светлее / Темнее):</span>
+                <span id="lightnessValLabel" class="slider-val">11%</span>
+              </div>
+              <input type="range" id="lightnessSlider" class="lightness-slider" min="0" max="100" value="11" step="1">
+            </div>
+
+            <!-- RGB Channel Sliders (Expandable) -->
+            <details class="rgb-details" open>
+              <summary class="rgb-summary">
+                <span>⚙️ Точная ручная настройка по каналам R, G, B:</span>
+              </summary>
+              <div class="rgb-sliders-grid">
+                <div class="rgb-row">
+                  <span class="rgb-badge red">R</span>
+                  <input type="range" id="rSlider" min="0" max="255" value="15" class="r-range">
+                  <span id="rValLabel" class="rgb-num">15</span>
+                </div>
+                <div class="rgb-row">
+                  <span class="rgb-badge green">G</span>
+                  <input type="range" id="gSlider" min="0" max="255" value="23" class="g-range">
+                  <span id="gValLabel" class="rgb-num">23</span>
+                </div>
+                <div class="rgb-row">
+                  <span class="rgb-badge blue">B</span>
+                  <input type="range" id="bSlider" min="0" max="255" value="42" class="b-range">
+                  <span id="bValLabel" class="rgb-num">42</span>
+                </div>
+              </div>
+            </details>
+
+            <!-- Expanded Visual Palette (36+ оттенков) -->
+            <div class="expanded-palette-section">
+              <span class="quick-label">Готовые популярные оттенки:</span>
+              <div class="palette-grid-wide" id="widePalette">
+                <!-- Buttons dynamically generated & statically listed for instant click -->
+                <button class="palette-square" data-color="#0f172a" style="background:#0f172a;" title="Графит"></button>
+                <button class="palette-square" data-color="#1e293b" style="background:#1e293b;" title="Сланец"></button>
+                <button class="palette-square" data-color="#475569" style="background:#475569;" title="Серый"></button>
+                <button class="palette-square" data-color="#94a3b8" style="background:#94a3b8;" title="Серебро"></button>
+                <button class="palette-square" data-color="#ffffff" style="background:#ffffff; border:1px solid #cbd5e1;" title="Белый"></button>
+                <button class="palette-square" data-color="#000000" style="background:#000000;" title="Черный"></button>
+
+                <button class="palette-square" data-color="#ef4444" style="background:#ef4444;" title="Алый"></button>
+                <button class="palette-square" data-color="#dc2626" style="background:#dc2626;" title="Красный"></button>
+                <button class="palette-square" data-color="#b91c1c" style="background:#b91c1c;" title="Темно-красный"></button>
+                <button class="palette-square" data-color="#f43f5e" style="background:#f43f5e;" title="Розово-красный"></button>
+                <button class="palette-square" data-color="#e11d48" style="background:#e11d48;" title="Малина"></button>
+                <button class="palette-square" data-color="#be123c" style="background:#be123c;" title="Бордо"></button>
+
+                <button class="palette-square" data-color="#f97316" style="background:#f97316;" title="Оранжевый"></button>
+                <button class="palette-square" data-color="#ea580c" style="background:#ea580c;" title="Мандарин"></button>
+                <button class="palette-square" data-color="#f59e0b" style="background:#f59e0b;" title="Янтарь"></button>
+                <button class="palette-square" data-color="#d97706" style="background:#d97706;" title="Золото"></button>
+                <button class="palette-square" data-color="#eab308" style="background:#eab308;" title="Желтый"></button>
+                <button class="palette-square" data-color="#84cc16" style="background:#84cc16;" title="Лайм"></button>
+
+                <button class="palette-square" data-color="#22c55e" style="background:#22c55e;" title="Зеленый"></button>
+                <button class="palette-square" data-color="#16a34a" style="background:#16a34a;" title="Лесной"></button>
+                <button class="palette-square" data-color="#10b981" style="background:#10b981;" title="Мята"></button>
+                <button class="palette-square" data-color="#059669" style="background:#059669;" title="Изумруд"></button>
+                <button class="palette-square" data-color="#14b8a6" style="background:#14b8a6;" title="Бирюза"></button>
+                <button class="palette-square" data-color="#0d9488" style="background:#0d9488;" title="Темная бирюза"></button>
+
+                <button class="palette-square" data-color="#06b6d4" style="background:#06b6d4;" title="Циан"></button>
+                <button class="palette-square" data-color="#0891b2" style="background:#0891b2;" title="Морской"></button>
+                <button class="palette-square" data-color="#0ea5e9" style="background:#0ea5e9;" title="Небесный"></button>
+                <button class="palette-square" data-color="#0284c7" style="background:#0284c7;" title="Голубой"></button>
+                <button class="palette-square" data-color="#3b82f6" style="background:#3b82f6;" title="Синий"></button>
+                <button class="palette-square" data-color="#2563eb" style="background:#2563eb;" title="Сапфир"></button>
+
+                <button class="palette-square" data-color="#6366f1" style="background:#6366f1;" title="Индиго"></button>
+                <button class="palette-square" data-color="#4f46e5" style="background:#4f46e5;" title="Ультрамарин"></button>
+                <button class="palette-square" data-color="#8b5cf6" style="background:#8b5cf6;" title="Фиолетовый"></button>
+                <button class="palette-square" data-color="#7c3aed" style="background:#7c3aed;" title="Неон фиолет"></button>
+                <button class="palette-square" data-color="#d946ef" style="background:#d946ef;" title="Фуксия"></button>
+                <button class="palette-square" data-color="#ec4899" style="background:#ec4899;" title="Розовый"></button>
+              </div>
+            </div>
+
+            <!-- Unique Color Schemes & Gradients (Уникальные дизайнерские цветовые решения) -->
+            <div class="unique-palettes-section">
+              <div class="unique-palette-header">
+                <span class="quick-label">✨ Уникальные дизайнерские цветовые решения:</span>
+                <span class="unique-hint">Градиенты и контрастные палитры</span>
+              </div>
+              <div class="unique-palettes-grid" id="uniquePalettesGrid">
+                <button class="unique-palette-btn" data-palette="indigo" title="Индиго Неон: глубокий синий градиент">
+                  <span class="palette-swatch-duo" style="background: linear-gradient(135deg, #2563eb, #4f46e5);"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Индиго Неон</span>
+                    <span class="palette-desc">Синий ➔ Индиго</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn" data-palette="cyber" title="Киберпанк: неоновый фиолетово-розовый градиент">
+                  <span class="palette-swatch-duo" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Киберпанк</span>
+                    <span class="palette-desc">Фиолет ➔ Фуксия</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn" data-palette="emerald" title="Изумрудный бор: освежающий зеленый градиент">
+                  <span class="palette-swatch-duo" style="background: linear-gradient(90deg, #059669, #10b981);"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Изумруд</span>
+                    <span class="palette-desc">Зеленый ➔ Мята</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn" data-palette="sunset" title="Закатный огонь: яркий энергичный градиент">
+                  <span class="palette-swatch-duo" style="background: linear-gradient(45deg, #f97316, #e11d48);"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Закатный огонь</span>
+                    <span class="palette-desc">Оранж ➔ Малина</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn" data-palette="gold" title="Королевское золото: роскошный янтарно-золотой градиент">
+                  <span class="palette-swatch-duo" style="background: linear-gradient(135deg, #d97706, #fbbf24);"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Королевское золото</span>
+                    <span class="palette-desc">Янтарь ➔ Золото</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn" data-palette="ocean" title="Морская бездна: сапфировый глубокий градиент">
+                  <span class="palette-swatch-duo" style="background: linear-gradient(135deg, #0284c7, #0f172a);"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Морская бездна</span>
+                    <span class="palette-desc">Лазурь ➔ Сапфир</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn" data-palette="midnight" title="Midnight Dark: неоновый циан на графитовом фоне">
+                  <span class="palette-swatch-duo" style="background: #06b6d4; border: 2.5px solid #0f172a;"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Midnight Dark</span>
+                    <span class="palette-desc">Циан на темном</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn" data-palette="berry" title="Спелая ягода: насыщенный градиент ежевики">
+                  <span class="palette-swatch-duo" style="background: linear-gradient(135deg, #7c3aed, #be123c);"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Спелая ягода</span>
+                    <span class="palette-desc">Фиолет ➔ Бордо</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn" data-palette="mint" title="Мятный фреш: свежий лаймово-бирюзовый градиент">
+                  <span class="palette-swatch-duo" style="background: linear-gradient(90deg, #0d9488, #84cc16);"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Мятный фреш</span>
+                    <span class="palette-desc">Бирюза ➔ Лайм</span>
+                  </div>
+                </button>
+
+                <button class="unique-palette-btn active" data-palette="monochrome" title="Премиум Монохром: строгий глубокий графит">
+                  <span class="palette-swatch-duo" style="background: #0f172a; border: 1px solid #94a3b8;"></span>
+                  <div class="palette-text">
+                    <span class="palette-title">Премиум Монохром</span>
+                    <span class="palette-desc">Строгий графит</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Background & Transparency Section -->
+          <div class="bg-settings-card">
+            <div class="bg-header-row">
+              <div class="bg-title-info">
+                <strong>Фон QR-кода</strong>
+                <span class="sub-info">Белый, цветной или полностью прозрачный</span>
+              </div>
+              <label class="toggle-switch-label">
+                <input type="checkbox" id="bgTransparentToggle">
+                <span class="toggle-slider"></span>
+                <span class="toggle-text">Прозрачный фон</span>
+              </label>
+            </div>
+
+            <!-- Solid Background Settings (Hidden when transparent) -->
+            <div id="solidBgControls" class="solid-bg-controls">
+              <!-- Background Opacity Slider -->
+              <div class="slider-control" style="margin-top: 6px;">
+                <div class="slider-header">
+                  <span>Непрозрачность фона:</span>
+                  <span id="bgOpacityVal" class="slider-val">100%</span>
+                </div>
+                <input type="range" id="bgOpacityInput" min="0" max="100" value="100" step="5">
+              </div>
+            </div>
+
+            <!-- Transparency Active Notice -->
+            <div id="transparentNotice" class="transparent-notice hidden">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Включена прозрачность: фон будет прозрачным при экспорте в PNG и SVG (идеально для наложения на любые сайты и стикеры)</span>
+            </div>
+          </div>
+
+          <!-- Independent Corner Markers Color Customization -->
+          <div class="corner-color-box">
+            <div class="corner-toggle-row">
+              <label class="form-checkbox">
+                <input type="checkbox" id="customCornerColorToggle">
+                <span class="checkbox-title">Индивидуальные цвета угловых маркеров</span>
+              </label>
+              <span class="badge-hint">Рамка и точка</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Live Preview & Actions -->
+      <aside class="preview-panel">
+        <div class="sticky-preview">
+          
+          <!-- Standard Canvas Card View -->
+          <div class="preview-canvas-card" id="standardPreviewCard">
+            <div class="qr-canvas-holder" id="qrCanvasContainer">
+              <!-- QR Code generated here via QRCodeStyling -->
+            </div>
+            <div class="preview-url-badge" id="previewUrlBadge" title="Открыть ссылку в новой вкладке">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              <span id="previewUrlText">https://ilma-it.github.io/ibragimov-ahmad/</span>
+            </div>
+          </div>
+
+          <!-- Readability Info Box with Dynamic Contrast Analysis (Без лишних текстов-подсказок) -->
+          <div class="readability-box" id="readabilityBox">
+            <div class="readability-header" id="readabilityHeader">
+              <svg id="readabilityIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span id="readabilityTitle">Отличная считываемость (Level H 30%)</span>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <!-- Local and fallback library script -->
+  <script src="qr-code-styling.js"></script>
+  <script src="app.js?v=2.1"></script>
+</body>
+</html>
