@@ -401,6 +401,38 @@
             </div>
           </div>
 
+          <!-- SVG Logo Color Studio (Векторное управление цветом SVG) -->
+          <div class="svg-color-section" id="svgColorSection" style="margin-bottom: 14px;">
+            <div class="density-header-row" style="margin-bottom: 8px;">
+              <label class="group-title" style="margin-bottom: 0;">🎨 Цвет SVG-логотипа:</label>
+              <span class="density-hint" id="svgColorHint" style="color: var(--primary-color); font-weight: 600;">Оригинальный</span>
+            </div>
+            <div class="shape-buttons" id="svgColorModes">
+              <button class="shape-btn active" data-svg-mode="original" title="Сохранить оригинальные цвета файла">Оригинальный</button>
+              <button class="shape-btn" data-svg-mode="matchQR" title="Окрасить логотип в тон основного цвета QR-кода">В цвет QR-кода</button>
+              <button class="shape-btn" data-svg-mode="custom" title="Выбрать свой цвет для иконки">Свой цвет</button>
+            </div>
+            
+            <div class="svg-custom-controls hidden" id="svgCustomControls" style="margin-top: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <label class="btn-native-picker" style="margin: 0; padding: 6px 14px; cursor: pointer;" title="Выбрать цвет в системном окне">
+                <input type="color" id="svgNativePicker" value="#2563eb" class="native-picker-hidden">
+                <div class="color-preview-large" id="svgColorPreviewThumb" style="width: 24px; height: 24px; border-radius: 6px; background: #2563eb; border: 1px solid rgba(0,0,0,0.15);"></div>
+                <span style="font-size: 0.85rem; font-weight: 600;">Пипетка</span>
+              </label>
+
+              <div class="svg-swatches-grid" id="svgSwatchesGrid" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button class="palette-square" data-svg-color="#2563eb" style="background:#2563eb; width:26px; height:26px;" title="Синий"></button>
+                <button class="palette-square" data-svg-color="#0284c7" style="background:#0284c7; width:26px; height:26px;" title="Голубой"></button>
+                <button class="palette-square" data-svg-color="#16a34a" style="background:#16a34a; width:26px; height:26px;" title="Зеленый"></button>
+                <button class="palette-square" data-svg-color="#dc2626" style="background:#dc2626; width:26px; height:26px;" title="Красный"></button>
+                <button class="palette-square" data-svg-color="#f97316" style="background:#f97316; width:26px; height:26px;" title="Оранжевый"></button>
+                <button class="palette-square" data-svg-color="#7c3aed" style="background:#7c3aed; width:26px; height:26px;" title="Фиолетовый"></button>
+                <button class="palette-square" data-svg-color="#0f172a" style="background:#0f172a; width:26px; height:26px;" title="Графит"></button>
+                <button class="palette-square" data-svg-color="#ffffff" style="background:#ffffff; border:1px solid #cbd5e1; width:26px; height:26px;" title="Белый"></button>
+              </div>
+            </div>
+          </div>
+
           <div class="form-row">
             <label class="form-checkbox">
               <input type="checkbox" id="hideDotsBehindLogo" checked>

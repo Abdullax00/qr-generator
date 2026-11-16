@@ -9,14 +9,24 @@
 // Helper to create safe Data URIs for SVGs across all browsers (including Safari)
 const createSvgDataUri = (svgStr) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr.trim())}`;
 
+// Raw SVG strings for lossless vector rendering, resizing, and color transformations
+const SAMPLE_LOGOS_RAW = {
+  globe: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  telegram: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0284c7"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>`,
+  whatsapp: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#16a34a"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.11 6.88C8.94 6.88 8.66 6.94 8.43 7.19C8.2 7.44 7.56 8.04 7.56 9.27C7.56 10.5 8.45 11.69 8.58 11.86C8.7 12.03 10.34 14.56 12.85 15.65C14.94 16.55 15.36 16.37 15.82 16.33C16.28 16.29 17.3 15.72 17.51 15.13C17.72 14.54 17.72 14.04 17.66 13.93C17.6 13.82 17.44 13.76 17.2 13.64C16.96 13.52 15.78 12.94 15.56 12.86C15.34 12.78 15.18 12.74 15.02 12.98C14.86 13.22 14.4 13.82 14.26 13.98C14.12 14.14 13.98 14.16 13.74 14.04C13.5 13.92 12.48 13.59 11.27 12.51C10.33 11.67 9.7 10.63 9.56 10.39C9.42 10.15 9.55 10.02 9.67 9.9C9.77 9.8 9.9 9.63 10.02 9.49C10.14 9.35 10.18 9.25 10.26 9.09C10.34 8.93 10.3 8.79 10.24 8.67C10.18 8.55 9.72 7.42 9.53 6.96C9.34 6.51 9.15 6.57 9.11 6.88Z"/></svg>`,
+  youtube: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#dc2626"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
+  github: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#181717"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>`,
+  star: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#eab308"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+};
+
 // Sample SVG Logos Data URIs
 const SAMPLE_LOGOS = {
-  globe: createSvgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`),
-  telegram: createSvgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="#0284c7"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>`),
-  whatsapp: createSvgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="#16a34a"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 15 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.11 6.88C8.94 6.88 8.66 6.94 8.43 7.19C8.2 7.44 7.56 8.04 7.56 9.27C7.56 10.5 8.45 11.69 8.58 11.86C8.7 12.03 10.34 14.56 12.85 15.65C14.94 16.55 15.36 16.37 15.82 16.33C16.28 16.29 17.3 15.72 17.51 15.13C17.72 14.54 17.72 14.04 17.66 13.93C17.6 13.82 17.44 13.76 17.2 13.64C16.96 13.52 15.78 12.94 15.56 12.86C15.34 12.78 15.18 12.74 15.02 12.98C14.86 13.22 14.4 13.82 14.26 13.98C14.12 14.14 13.98 14.16 13.74 14.04C13.5 13.92 12.48 13.59 11.27 12.51C10.33 11.67 9.7 10.63 9.56 10.39C9.42 10.15 9.55 10.02 9.67 9.9C9.77 9.8 9.9 9.63 10.02 9.49C10.14 9.35 10.18 9.25 10.26 9.09C10.34 8.93 10.3 8.79 10.24 8.67C10.18 8.55 9.72 7.42 9.53 6.96C9.34 6.51 9.15 6.57 9.11 6.88Z"/></svg>`),
-  youtube: createSvgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="#dc2626"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`),
-  github: createSvgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="#181717"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>`),
-  star: createSvgDataUri(`<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="#eab308"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`)
+  globe: createSvgDataUri(SAMPLE_LOGOS_RAW.globe),
+  telegram: createSvgDataUri(SAMPLE_LOGOS_RAW.telegram),
+  whatsapp: createSvgDataUri(SAMPLE_LOGOS_RAW.whatsapp),
+  youtube: createSvgDataUri(SAMPLE_LOGOS_RAW.youtube),
+  github: createSvgDataUri(SAMPLE_LOGOS_RAW.github),
+  star: createSvgDataUri(SAMPLE_LOGOS_RAW.star)
 };
 
 // 6 QR Geometry Styles (Форма и структура)
@@ -188,6 +198,10 @@ const state = {
   rawLogo: "",          // Raw source data URI or image
   logo: "",             // Final composited logo with badge
   logoName: "",
+  isSvgLogo: true,      // Pure vector mode flag (bypasses canvas rasterization)
+  svgRawString: "",     // Raw XML string of SVG for vector transformations
+  svgColorMode: "original", // 'original' | 'matchQR' | 'custom'
+  svgCustomColor: "#2563eb",
   logoSize: 0.45,
   logoMargin: 0,
   logoBadge: "circle",  // 'circle' | 'rounded' | 'none'
@@ -232,6 +246,15 @@ const dropzonePreview = document.getElementById("dropzonePreview");
 const logoPreviewThumb = document.getElementById("logoPreviewThumb");
 const logoFileName = document.getElementById("logoFileName");
 const removeLogoBtn = document.getElementById("removeLogoBtn");
+
+// SVG Vector Color Studio
+const svgColorSection = document.getElementById("svgColorSection");
+const svgColorHint = document.getElementById("svgColorHint");
+const svgColorModes = document.getElementById("svgColorModes");
+const svgCustomControls = document.getElementById("svgCustomControls");
+const svgNativePicker = document.getElementById("svgNativePicker");
+const svgColorPreviewThumb = document.getElementById("svgColorPreviewThumb");
+const svgSwatchesGrid = document.getElementById("svgSwatchesGrid");
 
 const logoSizeInput = document.getElementById("logoSizeInput");
 const logoSizeVal = document.getElementById("logoSizeVal");
@@ -585,6 +608,148 @@ function trimTransparentBorders(imgSource, callback) {
 }
 window.trimTransparentBorders = trimTransparentBorders;
 
+// Wrap raw SVG inside a pure vector backing badge (circle or rounded square)
+function wrapSvgWithBadge(rawSvg, badgeType = "circle", badgeColor = "#ffffff") {
+  if (!rawSvg || badgeType === "none") return rawSvg;
+  let cleanSvg = rawSvg.replace(/<\?xml[^>]*\?>/gi, "").replace(/<!DOCTYPE[^>]*>/gi, "").trim();
+
+  // If the SVG has no viewBox, add one if width and height exist
+  if (!/viewBox\s*=/i.test(cleanSvg)) {
+    const wMatch = cleanSvg.match(/(?:^|\s)width\s*=\s*["'](\d+(\.\d+)?)[^"']*["']/i);
+    const hMatch = cleanSvg.match(/(?:^|\s)height\s*=\s*["'](\d+(\.\d+)?)[^"']*["']/i);
+    const w = wMatch ? wMatch[1] : "100";
+    const h = hMatch ? hMatch[1] : "100";
+    cleanSvg = cleanSvg.replace(/<svg\b/i, `<svg viewBox="0 0 ${w} ${h}"`);
+  }
+
+  const badgeShape = badgeType === "circle"
+    ? `<circle cx="50" cy="50" r="50" fill="${badgeColor}" />`
+    : `<rect x="0" y="0" width="100" height="100" rx="20" ry="20" fill="${badgeColor}" />`;
+
+  // Adjust inner svg opening tag to place and scale it within the badge
+  const nestedSvg = cleanSvg.replace(/<svg\b([^>]*)>/i, (match, attrs) => {
+    const cleanAttrs = attrs
+      .replace(/(?:^|\s)(x|y|width|height|preserveAspectRatio)\s*=\s*["'][^"']*["']/gi, " ")
+      .trim();
+    return `<svg x="8" y="8" width="84" height="84" preserveAspectRatio="xMidYMid meet" ${cleanAttrs}>`;
+  });
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="400" height="400">
+  ${badgeShape}
+  ${nestedSvg}
+</svg>`;
+}
+
+// Dynamically recolors all visible fills and strokes in an SVG markup string
+function recolorSvgString(svgStr, targetColor) {
+  if (!svgStr || !targetColor) return svgStr;
+
+  try {
+    if (typeof DOMParser !== "undefined") {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgStr, "image/svg+xml");
+      const parserError = doc.querySelector("parsererror");
+      if (!parserError) {
+        const isNone = (val) => !val || val === "none" || val === "transparent";
+
+        const processEl = (el) => {
+          const tag = el.nodeName.toLowerCase();
+          if (["defs", "clippath", "mask", "lineargradient", "radialgradient", "filter", "metadata"].includes(tag)) {
+            return;
+          }
+
+          // Fill attribute
+          const fill = el.getAttribute("fill");
+          if (fill && !isNone(fill)) {
+            el.setAttribute("fill", targetColor);
+          }
+
+          // Stroke attribute
+          const stroke = el.getAttribute("stroke");
+          if (stroke && !isNone(stroke)) {
+            el.setAttribute("stroke", targetColor);
+          }
+
+          // Inline style
+          if (el.style) {
+            if (el.style.fill && !isNone(el.style.fill)) {
+              el.style.fill = targetColor;
+            }
+            if (el.style.stroke && !isNone(el.style.stroke)) {
+              el.style.stroke = targetColor;
+            }
+          }
+
+          // If shape has neither fill nor stroke, default in SVG is black fill
+          if (["path", "circle", "rect", "polygon", "polyline", "ellipse"].includes(tag)) {
+            const hasFill = el.hasAttribute("fill") || (el.style && el.style.fill);
+            const hasStroke = el.hasAttribute("stroke") || (el.style && el.style.stroke);
+            if (!hasFill && !hasStroke) {
+              el.setAttribute("fill", targetColor);
+            }
+          }
+        };
+
+        processEl(doc.documentElement);
+        const allEls = doc.documentElement.querySelectorAll("*");
+        allEls.forEach(processEl);
+
+        const serializer = new XMLSerializer();
+        return serializer.serializeToString(doc.documentElement);
+      }
+    }
+  } catch (err) {
+    console.warn("DOMParser recoloring failed, falling back to regex:", err);
+  }
+
+  // Regex fallback:
+  let res = svgStr;
+  res = res.replace(/(?:^|\s)fill\s*=\s*["'](?!none|transparent)[^"']+["']/gi, ` fill="${targetColor}"`);
+  res = res.replace(/(?:^|\s)stroke\s*=\s*["'](?!none|transparent)[^"']+["']/gi, ` stroke="${targetColor}"`);
+  return res;
+}
+
+// Synchronize SVG color studio UI with state
+function updateSvgColorUI() {
+  if (!svgColorSection) return;
+  if (!state.isSvgLogo) {
+    svgColorSection.classList.add("hidden");
+    return;
+  }
+  svgColorSection.classList.remove("hidden");
+
+  // Highlight active mode button
+  if (svgColorModes) {
+    svgColorModes.querySelectorAll(".shape-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-svg-mode") === state.svgColorMode);
+    });
+  }
+
+  // Update hint text
+  if (svgColorHint) {
+    if (state.svgColorMode === "original") svgColorHint.textContent = "Оригинальный";
+    else if (state.svgColorMode === "matchQR") svgColorHint.textContent = "В цвет QR-кода";
+    else if (state.svgColorMode === "custom") svgColorHint.textContent = state.svgCustomColor.toUpperCase();
+  }
+
+  // Show/hide custom controls
+  if (svgCustomControls) {
+    if (state.svgColorMode === "custom") {
+      svgCustomControls.classList.remove("hidden");
+    } else {
+      svgCustomControls.classList.add("hidden");
+    }
+  }
+
+  // Update color picker thumb
+  if (svgColorPreviewThumb) {
+    svgColorPreviewThumb.style.background = state.svgCustomColor;
+  }
+  if (svgNativePicker) {
+    svgNativePicker.value = state.svgCustomColor;
+  }
+}
+
 // Process raw logo with optional circular or rounded backing badge
 function processAndApplyLogo() {
   if (!state.rawLogo) {
@@ -593,8 +758,37 @@ function processAndApplyLogo() {
     return;
   }
 
+  // 1. PURE VECTOR PIPELINE FOR SVG LOGOS:
+  // Preserves 100% crisp vector fidelity at any zoom/export and allows dynamic color adjustments
+  if (state.isSvgLogo && state.svgRawString) {
+    let finalSvg = state.svgRawString;
+
+    // Apply color transformation if requested
+    if (state.svgColorMode === "matchQR") {
+      const targetColor = state.dotsColor1 || "#000000";
+      finalSvg = recolorSvgString(finalSvg, targetColor);
+    } else if (state.svgColorMode === "custom") {
+      const targetColor = state.svgCustomColor || "#2563eb";
+      finalSvg = recolorSvgString(finalSvg, targetColor);
+    }
+
+    // Wrap with vector badge if enabled
+    if (state.logoBadge !== "none") {
+      finalSvg = wrapSvgWithBadge(finalSvg, state.logoBadge, "#ffffff");
+    }
+
+    state.logo = createSvgDataUri(finalSvg);
+    if (logoPreviewThumb) {
+      logoPreviewThumb.src = state.logo;
+    }
+    refreshQRCode();
+    return;
+  }
+
+  // 2. RASTER PIPELINE FOR BITMAP LOGOS (PNG, JPG, WEBP):
   if (state.logoBadge === "none") {
     state.logo = state.rawLogo;
+    if (logoPreviewThumb) logoPreviewThumb.src = state.logo;
     refreshQRCode();
     return;
   }
@@ -657,11 +851,13 @@ function processAndApplyLogo() {
 
     ctx.drawImage(img, padX, padY, destW, destH);
     state.logo = canvas.toDataURL("image/png");
+    if (logoPreviewThumb) logoPreviewThumb.src = state.logo;
     refreshQRCode();
   };
 
   img.onerror = () => {
     state.logo = state.rawLogo;
+    if (logoPreviewThumb) logoPreviewThumb.src = state.logo;
     refreshQRCode();
   };
 
@@ -718,7 +914,11 @@ function applyUniquePalette(paletteKey) {
   });
 
   syncInputsWithState();
-  refreshQRCode();
+  if (state.isSvgLogo && state.svgColorMode === "matchQR") {
+    processAndApplyLogo();
+  } else {
+    refreshQRCode();
+  }
   showToast(`Цветовая схема: ${pal.name}`);
 }
 
@@ -770,7 +970,11 @@ function setActiveTargetColor(hexColor) {
 
   markCustomColor();
   updateStudioMixerFromActiveTarget();
-  refreshQRCode();
+  if (state.isSvgLogo && state.svgColorMode === "matchQR") {
+    processAndApplyLogo();
+  } else {
+    refreshQRCode();
+  }
 }
 
 // Update Studio Mixer controls based on current target color
@@ -1158,6 +1362,46 @@ function setupEvents() {
     });
   });
 
+  // SVG Logo Color Mode Buttons (Original, Match QR, Custom)
+  if (svgColorModes) {
+    svgColorModes.querySelectorAll(".shape-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const mode = btn.getAttribute("data-svg-mode");
+        state.svgColorMode = mode;
+        updateSvgColorUI();
+        processAndApplyLogo();
+        showToast(
+          mode === "original" ? "Цвет логотипа: оригинальный" :
+          mode === "matchQR" ? "Цвет логотипа: в тон QR-кода" : "Выбран свой цвет логотипа"
+        );
+      });
+    });
+  }
+
+  // SVG Native Color Picker
+  if (svgNativePicker) {
+    svgNativePicker.addEventListener("input", (e) => {
+      state.svgCustomColor = e.target.value;
+      if (svgColorPreviewThumb) svgColorPreviewThumb.style.background = state.svgCustomColor;
+      if (svgColorHint) svgColorHint.textContent = state.svgCustomColor.toUpperCase();
+      processAndApplyLogo();
+    });
+  }
+
+  // SVG Preset Color Swatches
+  if (svgSwatchesGrid) {
+    svgSwatchesGrid.querySelectorAll(".palette-square").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const col = btn.getAttribute("data-svg-color");
+        state.svgCustomColor = col;
+        if (svgNativePicker) svgNativePicker.value = col;
+        if (svgColorPreviewThumb) svgColorPreviewThumb.style.background = col;
+        if (svgColorHint) svgColorHint.textContent = col.toUpperCase();
+        processAndApplyLogo();
+      });
+    });
+  }
+
   // 3. QR Geometric Styles Bar (Top Bar Buttons with Icons)
   document.querySelectorAll(".style-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -1481,27 +1725,50 @@ function handleLogoFile(file) {
   if (!file) return;
 
   const validTypes = ["image/png", "image/svg+xml", "image/jpeg", "image/webp", "image/jpg"];
+  const isSvg = file.type === "image/svg+xml" || /\.svg$/i.test(file.name);
   const isValidExt = /\.(png|jpe?g|svg|webp)$/i.test(file.name);
   if (!validTypes.includes(file.type) && !isValidExt) {
     showToast("Пожалуйста, загрузите PNG, SVG, JPG или WebP файл", "error");
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const rawData = e.target.result;
-    state.logoName = file.name;
+  state.logoName = file.name;
 
-    // Auto-trim transparent borders so no empty gaps appear between logo and QR code dots
-    trimTransparentBorders(rawData, (trimmedData) => {
-      state.rawLogo = trimmedData;
+  if (isSvg) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const svgText = e.target.result;
+      state.isSvgLogo = true;
+      state.svgRawString = svgText;
+      state.rawLogo = createSvgDataUri(svgText);
 
-      // Show preview UI
-      logoPreviewThumb.src = trimmedData;
       logoFileName.textContent = file.name;
       dropzoneEmpty.classList.add("hidden");
       dropzonePreview.classList.remove("hidden");
+      document.querySelectorAll(".sample-logo-btn").forEach((b) => b.classList.remove("active"));
 
+      updateSvgColorUI();
+      processAndApplyLogo();
+      showToast("Векторный SVG-логотип успешно загружен!");
+    };
+    reader.readAsText(file);
+    return;
+  }
+
+  // Raster image pipeline (PNG, JPG, WebP)
+  state.isSvgLogo = false;
+  state.svgRawString = null;
+  updateSvgColorUI();
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const rawData = e.target.result;
+    trimTransparentBorders(rawData, (trimmedData) => {
+      state.rawLogo = trimmedData;
+
+      logoFileName.textContent = file.name;
+      dropzoneEmpty.classList.add("hidden");
+      dropzonePreview.classList.remove("hidden");
       document.querySelectorAll(".sample-logo-btn").forEach((b) => b.classList.remove("active"));
 
       processAndApplyLogo();
@@ -1513,12 +1780,13 @@ function handleLogoFile(file) {
 
 // Select Sample Logo
 function selectSampleLogo(iconKey, filename) {
-  if (!SAMPLE_LOGOS[iconKey]) return;
+  if (!SAMPLE_LOGOS_RAW[iconKey]) return;
 
+  state.isSvgLogo = true;
+  state.svgRawString = SAMPLE_LOGOS_RAW[iconKey];
   state.rawLogo = SAMPLE_LOGOS[iconKey];
   state.logoName = filename;
 
-  logoPreviewThumb.src = state.rawLogo;
   logoFileName.textContent = filename;
   dropzoneEmpty.classList.add("hidden");
   dropzonePreview.classList.remove("hidden");
@@ -1527,6 +1795,7 @@ function selectSampleLogo(iconKey, filename) {
     b.classList.toggle("active", b.getAttribute("data-icon") === iconKey);
   });
 
+  updateSvgColorUI();
   processAndApplyLogo();
 }
 
@@ -1535,10 +1804,13 @@ function clearLogo() {
   state.rawLogo = "";
   state.logo = "";
   state.logoName = "";
+  state.isSvgLogo = false;
+  state.svgRawString = null;
   logoFileInput.value = "";
   dropzoneEmpty.classList.remove("hidden");
   dropzonePreview.classList.add("hidden");
   document.querySelectorAll(".sample-logo-btn").forEach((b) => b.classList.remove("active"));
+  updateSvgColorUI();
   refreshQRCode();
   showToast("Логотип удалён");
 }
