@@ -398,11 +398,20 @@
 
           <!-- Logo Badge Shape -->
           <div class="logo-badge-section" style="margin-bottom: 12px;">
-            <label class="group-title">Подложка под логотип:</label>
+            <div class="density-header-row" style="margin-bottom: 8px;">
+              <label class="group-title" style="margin-bottom: 0;">Фон и подложка логотипа:</label>
+              <span class="density-hint" id="logoBadgeHint" style="color: var(--primary-color); font-weight: 600;">Белый круг</span>
+            </div>
             <div class="shape-buttons" id="logoBadgeBtns">
-              <button class="shape-btn active" data-badge="circle">Круглая белая</button>
-              <button class="shape-btn" data-badge="rounded">Закругленный квадрат</button>
-              <button class="shape-btn" data-badge="none">Без подложки</button>
+              <button class="shape-btn" data-badge="none" title="Прозрачный фон: без подложки и без фонового слоя">🚫 Без подложки (прозрачный)</button>
+              <button class="shape-btn active" data-badge="circle" title="Белая круглая подложка для контраста">⚪ Белый круг</button>
+              <button class="shape-btn" data-badge="rounded" title="Белый скругленный квадрат">⬜ Скругленный квадрат</button>
+            </div>
+            <div class="form-row" id="svgCleanBgRow" style="margin-top: 8px; margin-bottom: 0;">
+              <label class="form-checkbox">
+                <input type="checkbox" id="stripSvgBgToggle" checked>
+                <span>Удалять встроенный фон SVG (очистить белый/цветной подслой из файла)</span>
+              </label>
             </div>
           </div>
 

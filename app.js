@@ -205,6 +205,7 @@ const state = {
   logoSize: 0.45,
   logoMargin: 0,
   logoBadge: "circle",  // 'circle' | 'rounded' | 'none'
+  stripSvgBg: true,     // Auto-remove embedded full-bleed background layers from SVG
   hideDotsBehindLogo: true,
   colorMode: "solid",   // 'solid' | 'linear' | 'radial'
   dotsColor1: "#0f172a",
@@ -247,7 +248,9 @@ const logoPreviewThumb = document.getElementById("logoPreviewThumb");
 const logoFileName = document.getElementById("logoFileName");
 const removeLogoBtn = document.getElementById("removeLogoBtn");
 
-// SVG Vector Color Studio
+// SVG Vector Color Studio & Badge
+const logoBadgeHint = document.getElementById("logoBadgeHint");
+const stripSvgBgToggle = document.getElementById("stripSvgBgToggle");
 const svgColorSection = document.getElementById("svgColorSection");
 const svgColorHint = document.getElementById("svgColorHint");
 const svgColorModes = document.getElementById("svgColorModes");
@@ -610,6 +613,74 @@ function trimTransparentBorders(imgSource, callback) {
 }
 window.trimTransparentBorders = trimTransparentBorders;
 
+// Remove background rects, layers, and inline background styling from an SVG
+function stripSvgBackground(svgStr) {
+  if (!svgStr) return svgStr;
+
+  try {
+    if (typeof DOMParser !== "undefined") {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgStr, "image/svg+xml");
+      if (!doc.querySelector("parsererror")) {
+        const svgEl = doc.documentElement;
+        if (svgEl) {
+          // 1. Remove background styles from <svg>
+          if (svgEl.style) {
+            svgEl.style.removeProperty("background");
+            svgEl.style.removeProperty("background-color");
+          }
+
+          // 2. Remove background groups like <g id="background"> or <g class="background">
+          const bgGroups = doc.querySelectorAll('g[id*="bg" i], g[id*="background" i], g[class*="background" i], g[id*="artboard" i]');
+          bgGroups.forEach((g) => g.remove());
+
+          // 3. Extract viewBox or width/height dimensions
+          let vbW = null, vbH = null;
+          const vb = svgEl.getAttribute("viewBox");
+          if (vb) {
+            const parts = vb.trim().split(/[\s,]+/);
+            if (parts.length === 4) {
+              vbW = parseFloat(parts[2]);
+              vbH = parseFloat(parts[3]);
+            }
+          }
+          if (!vbW) vbW = parseFloat(svgEl.getAttribute("width"));
+          if (!vbH) vbH = parseFloat(svgEl.getAttribute("height"));
+
+          // 4. Find potential full-bleed background rects
+          const rects = doc.querySelectorAll("rect");
+          rects.forEach((rect) => {
+            const id = (rect.getAttribute("id") || "").toLowerCase();
+            const cls = (rect.getAttribute("class") || "").toLowerCase();
+            const w = rect.getAttribute("width") || "";
+            const h = rect.getAttribute("height") || "";
+            const x = parseFloat(rect.getAttribute("x") || "0");
+            const y = parseFloat(rect.getAttribute("y") || "0");
+
+            const is100Percent = w.includes("100%") || h.includes("100%");
+            const isNamedBg = id.includes("bg") || id.includes("background") || id.includes("canvas") || cls.includes("background");
+            const isFullSize = vbW && vbH && Math.abs(parseFloat(w) - vbW) < 1.5 && Math.abs(parseFloat(h) - vbH) < 1.5 && x <= 0.1 && y <= 0.1;
+
+            if (is100Percent || isNamedBg || isFullSize) {
+              rect.remove();
+            }
+          });
+
+          return new XMLSerializer().serializeToString(svgEl);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("DOMParser background strip error:", err);
+  }
+
+  // Regex fallback:
+  let res = svgStr.replace(/(<svg\b[^>]*\bstyle\s*=\s*["'][^"']*)(?:background|background-color)\s*:[^;"']*;?/gi, "$1");
+  res = res.replace(/<rect\b[^>]*(?:width\s*=\s*["']100%["']|id\s*=\s*["'](?:bg|background|canvas)["'])[^>]*\/?>/gi, "");
+  res = res.replace(/<rect\b[^>]*\bfill\s*=\s*["'](?:#fff(?:fff)?|white)["'][^>]*\b(?:width|height)\s*=\s*["']100%["'][^>]*\/?>/gi, "");
+  return res;
+}
+
 // Wrap raw SVG inside a pure vector backing badge (circle or rounded square)
 function wrapSvgWithBadge(rawSvg, badgeType = "circle", badgeColor = "#ffffff") {
   if (!rawSvg || badgeType === "none") return rawSvg;
@@ -765,6 +836,11 @@ function processAndApplyLogo() {
   if (state.isSvgLogo && state.svgRawString) {
     let finalSvg = state.svgRawString;
 
+    // Strip embedded background rect/layer if stripSvgBg is active OR if logoBadge is 'none'
+    if (state.stripSvgBg || state.logoBadge === "none") {
+      finalSvg = stripSvgBackground(finalSvg);
+    }
+
     // Apply color transformation if requested
     if (state.svgColorMode === "matchQR") {
       const targetColor = state.dotsColor1 || "#000000";
@@ -774,9 +850,22 @@ function processAndApplyLogo() {
       finalSvg = recolorSvgString(finalSvg, targetColor);
     }
 
-    // Wrap with vector badge if enabled
+    // Wrap with vector badge if enabled (circle or rounded white badge)
     if (state.logoBadge !== "none") {
       finalSvg = wrapSvgWithBadge(finalSvg, state.logoBadge, "#ffffff");
+    } else {
+      // Clean XML headers and ensure valid xmlns & viewBox for pure transparent rendering
+      finalSvg = finalSvg.replace(/<\?xml[^>]*\?>/gi, "").replace(/<!DOCTYPE[^>]*>/gi, "").trim();
+      if (!/xmlns\s*=/i.test(finalSvg)) {
+        finalSvg = finalSvg.replace(/<svg\b/i, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      if (!/viewBox\s*=/i.test(finalSvg)) {
+        const wMatch = finalSvg.match(/(?:^|\s)width\s*=\s*["'](\d+(\.\d+)?)[^"']*["']/i);
+        const hMatch = finalSvg.match(/(?:^|\s)height\s*=\s*["'](\d+(\.\d+)?)[^"']*["']/i);
+        const w = wMatch ? wMatch[1] : "100";
+        const h = hMatch ? hMatch[1] : "100";
+        finalSvg = finalSvg.replace(/<svg\b/i, `<svg viewBox="0 0 ${w} ${h}"`);
+      }
     }
 
     state.logo = createSvgDataUri(finalSvg);
@@ -1353,16 +1442,36 @@ function setupEvents() {
     refreshQRCode();
   });
 
-  // Logo Badge Buttons (Circle, Rounded, None)
+  // Logo Badge / Background Buttons (Circle, Rounded, None)
   document.querySelectorAll("#logoBadgeBtns .shape-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll("#logoBadgeBtns .shape-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
-      state.logoBadge = btn.getAttribute("data-badge");
+      const badge = btn.getAttribute("data-badge");
+      state.logoBadge = badge;
+
+      if (logoBadgeHint) {
+        logoBadgeHint.textContent =
+          badge === "none" ? "Без подложки (прозрачный)" :
+          badge === "circle" ? "Белый круг" : "Скругленный квадрат";
+      }
+
       processAndApplyLogo();
-      showToast(state.logoBadge === "none" ? "Подложка отключена" : "Подложка логотипа обновлена");
+      showToast(
+        badge === "none" ? "Фон логотипа убран (прозрачный)" :
+        badge === "circle" ? "Включена круглая белая подложка" : "Включена квадратная белая подложка"
+      );
     });
   });
+
+  // SVG Strip Embedded Background Toggle
+  if (stripSvgBgToggle) {
+    stripSvgBgToggle.addEventListener("change", (e) => {
+      state.stripSvgBg = e.target.checked;
+      processAndApplyLogo();
+      showToast(state.stripSvgBg ? "Очистка встроенного фона SVG включена" : "Очистка фона выключена");
+    });
+  }
 
   // SVG Logo Color Mode Buttons (Original, Match QR, Custom)
   if (svgColorModes) {
@@ -1748,6 +1857,11 @@ function handleLogoFile(file) {
       state.svgRawString = svgText;
       state.rawLogo = createSvgDataUri(svgText);
 
+      // Default custom uploaded SVG to transparent background (no forced white circle)
+      state.logoBadge = "none";
+      syncActiveButton("#logoBadgeBtns", "none");
+      if (logoBadgeHint) logoBadgeHint.textContent = "Без подложки (прозрачный)";
+
       logoFileName.textContent = file.name;
       dropzoneEmpty.classList.add("hidden");
       dropzonePreview.classList.remove("hidden");
@@ -1755,7 +1869,7 @@ function handleLogoFile(file) {
 
       updateSvgColorUI();
       processAndApplyLogo();
-      showToast("Векторный SVG-логотип успешно загружен!");
+      showToast("Векторный SVG загружен (фон прозрачный)!");
     };
     reader.readAsText(file);
     return;
@@ -1764,6 +1878,9 @@ function handleLogoFile(file) {
   // Raster image pipeline (PNG, JPG, WebP)
   state.isSvgLogo = false;
   state.svgRawString = null;
+  state.logoBadge = "none";
+  syncActiveButton("#logoBadgeBtns", "none");
+  if (logoBadgeHint) logoBadgeHint.textContent = "Без подложки (прозрачный)";
   updateSvgColorUI();
 
   const reader = new FileReader();
@@ -1792,6 +1909,9 @@ function selectSampleLogo(iconKey, filename) {
   state.svgRawString = SAMPLE_LOGOS_RAW[iconKey];
   state.rawLogo = SAMPLE_LOGOS[iconKey];
   state.logoName = filename;
+  state.logoBadge = "circle";
+  syncActiveButton("#logoBadgeBtns", "circle");
+  if (logoBadgeHint) logoBadgeHint.textContent = "Белый круг";
 
   logoFileName.textContent = filename;
   dropzoneEmpty.classList.add("hidden");
@@ -1859,6 +1979,7 @@ function resetToDefaults() {
   state.logoSize = 0.45;
   state.logoMargin = 0;
   state.logoBadge = "circle";
+  state.stripSvgBg = true;
   state.hideDotsBehindLogo = true;
 
   // 2. Synchronize UI Inputs
@@ -1891,6 +2012,8 @@ function resetToDefaults() {
   if (hideDotsBehindLogo) hideDotsBehindLogo.checked = true;
 
   syncActiveButton("#logoBadgeBtns", "circle");
+  if (logoBadgeHint) logoBadgeHint.textContent = "Белый круг";
+  if (stripSvgBgToggle) stripSvgBgToggle.checked = true;
 
   // Sample Logo buttons
   document.querySelectorAll(".sample-logo-btn").forEach((b) => {
