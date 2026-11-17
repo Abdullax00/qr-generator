@@ -2096,20 +2096,75 @@ function syncActiveButton(containerSelector, activeVal) {
   });
 }
 
+// Generate clean, readable file name based on current URL/target for easy identification
+function generateQrFileName(rawUrl, isTransparent = false) {
+  if (!rawUrl || typeof rawUrl !== "string") {
+    return isTransparent ? "qr-code-transparent" : "qr-code";
+  }
+
+  let str = rawUrl.trim();
+
+  // Special protocol prefixes
+  let prefix = "";
+  if (/^tel:/i.test(str)) {
+    prefix = "tel-";
+    str = str.replace(/^tel:/i, "");
+  } else if (/^mailto:/i.test(str)) {
+    prefix = "mail-";
+    str = str.replace(/^mailto:/i, "");
+  } else if (/^tg:\/\/resolve\?domain=/i.test(str)) {
+    prefix = "tg-";
+    str = str.replace(/^tg:\/\/resolve\?domain=/i, "");
+  } else if (/^tg:\/\//i.test(str)) {
+    prefix = "tg-";
+    str = str.replace(/^tg:\/\//i, "");
+  } else {
+    // Strip http://, https://, and leading www.
+    str = str.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
+  }
+
+  // Remove query string and hash fragments for cleaner file names
+  str = str.replace(/[?#].*$/, "");
+  str = str.replace(/\/+$/, "");
+
+  // Convert separators to hyphens
+  let slug = str
+    .replace(/[/\\:._+=@~]+/g, "-")
+    // Keep letters, numbers, hyphens (supports Cyrillic and Latin safely)
+    .replace(/[^\p{L}\p{N}-]+/gu, "")
+    // Deduplicate hyphens
+    .replace(/-+/g, "-")
+    // Trim leading/trailing hyphens
+    .replace(/^-+|-+$/g, "");
+
+  if (!slug) {
+    slug = "code";
+  }
+
+  // Limit slug length to 50 characters to avoid OS path length issues
+  if (slug.length > 50) {
+    slug = slug.substring(0, 50).replace(/-+$/, "");
+  }
+
+  const base = prefix ? `qr-${prefix}${slug}` : `qr-${slug}`;
+  return isTransparent ? `${base}-transparent` : base;
+}
+
 // Download High-Resolution PNG
 async function downloadPNG() {
   if (!qrCode) return;
   const res = state.resolution || 1024;
+  const fileName = generateQrFileName(state.url, state.isBgTransparent);
   showToast(`Формирование PNG (${res}×${res})...`);
 
   const exportQR = new QRCodeStyling(getQROptions(res, res));
   
   try {
     await exportQR.download({
-      name: `qr-code-${state.isBgTransparent ? "transparent-" : ""}${Date.now()}`,
+      name: fileName,
       extension: "png"
     });
-    showToast("PNG файл успешно сохранён!");
+    showToast(`PNG файл «${fileName}.png» успешно сохранён!`);
   } catch (err) {
     console.error("Ошибка при скачивании PNG:", err);
     showToast("Не удалось сохранить файл", "error");
@@ -2119,6 +2174,7 @@ async function downloadPNG() {
 // Download Scalable Vector SVG
 async function downloadSVG() {
   if (!qrCode) return;
+  const fileName = generateQrFileName(state.url, state.isBgTransparent);
   showToast("Формирование векторного SVG...");
 
   const exportQR = new QRCodeStyling({
@@ -2128,10 +2184,10 @@ async function downloadSVG() {
 
   try {
     await exportQR.download({
-      name: `qr-code-${state.isBgTransparent ? "transparent-" : ""}${Date.now()}`,
+      name: fileName,
       extension: "svg"
     });
-    showToast("Векторный SVG успешно сохранён!");
+    showToast(`Векторный SVG «${fileName}.svg» успешно сохранён!`);
   } catch (err) {
     console.error("Ошибка при скачивании SVG:", err);
     showToast("Не удалось сохранить SVG", "error");
